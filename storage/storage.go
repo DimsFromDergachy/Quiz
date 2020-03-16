@@ -4,28 +4,26 @@ import (
 	"log"
 )
 
-func insertEvent(active bool) {
-	connect()
+type events struct {
+	Events []event
+}
 
-	stmt, err := db.Prepare("INSERT INTO events(active) VALUES(?)")
+func insertEvent(event event) {
+	stmt, err := db.Prepare("INSERT INTO events(title, active, date_prod) VALUES($1, $2, $3)")
 	if err != nil {
 		log.Output(1, "DT #5")
 		log.Fatal(err)
 	}
-	res, err := stmt.Exec(active)
+	res, err := stmt.Exec(event.title, event.active, event.date)
 	if err != nil {
 		log.Output(1, "DT #4")
-		log.Fatal(err)
-	}
-	lastID, err := res.LastInsertId()
-	if err != nil {
 		log.Fatal(err)
 	}
 	rowCnt, err := res.RowsAffected()
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("ID = %d, affected = %d\n", lastID, rowCnt)
+	log.Printf("Affected = %d\n", rowCnt)
 }
 
 func getEvents() {
@@ -33,7 +31,7 @@ func getEvents() {
 		id     int
 		active bool
 	)
-	rows, err := db.Query("select id, name from users where id = ?", 1)
+	rows, err := db.Query("select id, active from events")
 	if err != nil {
 		log.Output(1, "DT #1")
 		log.Fatal(err)
@@ -53,9 +51,9 @@ func getEvents() {
 		log.Fatal(err)
 	}
 
-	event := &Event{
-		ID:     id,
-		Active: active,
+	event := &event{
+		id:     id,
+		active: active,
 	}
 
 	log.Println(event)

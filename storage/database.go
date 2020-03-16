@@ -35,15 +35,30 @@ func connect() {
 	if err = db.Ping(); err != nil {
 		log.Fatal(err)
 	}
+}
 
-	//defer db.Close()
+func dropTable() {
+	var dropTable = `DROP TABLE events`
+
+	stmt, err := db.Prepare(dropTable)
+
+	if err != nil {
+		log.Output(1, "DT #8")
+		log.Fatal(err)
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		log.Output(1, "DT #9")
+		log.Fatal(err)
+	}
+	log.Output(1, "Database 'events' was dropped")
 }
 
 func createTables() {
 	var createTableEvents = `CREATE TABLE events (
-		ID          integer CONSTRAINT firstkey PRIMARY KEY,
+		ID          SERIAL,
 		title       varchar(40) NOT NULL,
-		active      integer NOT NULL,
+		active      boolean NOT NULL,
 		date_prod   date
 		);`
 
@@ -53,18 +68,9 @@ func createTables() {
 		log.Output(1, "DT #6")
 		log.Fatal(err)
 	}
-	res, err := stmt.Exec()
+	_, err = stmt.Exec()
 	if err != nil {
 		log.Output(1, "DT #7")
 		log.Fatal(err)
 	}
-	lastID, err := res.LastInsertId()
-	if err != nil {
-		log.Fatal(err)
-	}
-	rowCnt, err := res.RowsAffected()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("ID = %d, affected = %d\n", lastID, rowCnt)
 }
